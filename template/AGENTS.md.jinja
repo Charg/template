@@ -1,0 +1,64 @@
+# AGENTS.md
+
+<!-- BEGIN TEMPLATE: managed by [[ template_repo ]] through `copier update`. Edit it there, not here. -->
+
+## Toolchain
+
+- **The toolchain is the nix flake.** Run everything inside `nix develop` (direnv loads it through
+  `.envrc`), or one-shot as `nix develop -c just <recipe>`. Never install tools ad hoc or pin a tool
+  version in a script or workflow: add it to `flake.nix`, bump it with `nix flake update`.
+- **`just` is the only interface.** Recipes are one-line shims over scripts in `hack/`, and CI calls
+  the same recipes a developer runs locally. New behaviour goes in `hack/`, then gets a recipe, then
+  CI calls the recipe. No logic in workflow YAML beyond setup and secrets.
+- **`hack/` scripts** are bash and start with `source "$(dirname "${BASH_SOURCE[0]}")/tools.sh"`,
+  which sets `set -euo pipefail` and holds the shared helpers (`log`, `die`, `require_tools`,
+  `repo_files`).
+- Run `just lint` before committing. The prek hook (`just install-hooks`) runs it on commit.
+- Plans, tickets and throwaway output go in `.scratch/` (gitignored).
+[% if github %]
+
+## GitHub Actions
+
+- Workflows start with `permissions: {}` and grant each job only what it needs. Check out with
+  `persist-credentials: false`.
+- Pin every `uses:` to a full commit SHA with a version comment.
+- After adding or bumping an action, regenerate `.github/workflows/actions.lock` with
+  `gh actions-lock --no-narrow`. Without `--no-narrow` it rewrites SHA pins to tags, which zizmor's
+  `unpinned-uses` audit rejects.
+- Renovate policy (release age, automerge, nix lock maintenance) comes from the shared preset in
+  `[[ template_repo ]]` (`renovate/default.json5`). `.github/renovate.json5` holds only this repo's
+  additions.
+
+## Commits
+
+- Conventional commits: `feat:`, `fix:`, `chore:`, `ci:`, `docs:`, `refactor:`, `test:`,
+  optionally scoped (`feat(api): ...`).
+- Work on a branch and open a PR. PRs squash-merge. Don't commit to `main` directly.
+- Commit only when asked.
+[% else %]
+
+## Commits
+
+- **This repo is offline.** There is no git remote: don't push, open PRs or use GitHub issues.
+  Ignore skills built around branches and PRs.
+- Commit directly to `main` with conventional commit messages (`feat:`, `fix:`, `docs:`, ...).
+- Commit only when asked.
+[% endif %]
+
+## Template
+
+- Shared files (flake, justfile, `hack/tools.sh`, `hack/lint.sh`, lint configs, CI, this section)
+  come from `[[ template_repo ]]`; the answers are in `.copier-answers.yml`, which is never edited by
+  hand. Pull template changes with `copier update` and resolve any conflicts it leaves.
+- Projects extend the shared files freely (packages in `flake.nix`, recipes, lint steps);
+  `copier update` merges template changes around those edits.
+- Only the text between the TEMPLATE markers in this file belongs to the template. Project rules go
+  under `## Project` below.
+
+<!-- END TEMPLATE -->
+
+## Project
+
+[[ description ]]
+
+<!-- Project-specific rules for agents: layout, build and test commands, conventions, gotchas. -->

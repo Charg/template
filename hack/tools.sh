@@ -1,0 +1,1 @@
+../template/hack/tools.sh
