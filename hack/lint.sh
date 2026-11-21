@@ -1,0 +1,1 @@
+../template/hack/lint.sh

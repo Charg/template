@@ -1,0 +1,7 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  // This repo follows the same preset it publishes. Renovate's default file patterns also find the
+  // pinned actions under template/.github/workflows/ and the hooks in
+  // template/.pre-commit-config.yaml, so bumps there reach projects through `copier update`.
+  extends: ["local>Charg/template//renovate/default.json5"],
+}

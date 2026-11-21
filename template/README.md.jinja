@@ -1,0 +1,16 @@
+# [[ project_name ]]
+
+[[ description ]]
+
+## Development
+
+The toolchain is a nix flake. [direnv](https://direnv.net/) loads it through `.envrc`; otherwise run
+`nix develop` (or one-shot: `nix develop -c just <recipe>`).
+
+```sh
+just                # list recipes
+just lint           # run every linter (what CI runs)
+just install-hooks  # install the prek git hooks
+```
+
+Generated from <https://github.com/[[ template_repo ]]>. Pull template updates with `copier update`.

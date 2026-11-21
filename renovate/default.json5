@@ -1,0 +1,61 @@
+// Shared Renovate preset for every project generated from this template. Projects extend it with
+//   extends: ["github>Charg/template//renovate/default.json5"]
+// and add only their own packageRules and customManagers. Later rules override earlier ones, so
+// project rules can opt specific packages out of automerge.
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "config:recommended",
+    ":semanticCommits",
+    // Actions are SHA-pinned with "# vX.Y.Z" comments; keep the digest and the comment in sync.
+    "helpers:pinGitHubActionDigests",
+  ],
+
+  semanticCommitType: "chore",
+  labels: ["dependencies"],
+  timezone: "America/Los_Angeles",
+  configMigration: true,
+
+  // Keep in sync with the gh-actions-lock version used locally (home: nix/packages/gh-actions-lock.nix).
+  constraints: {
+    ghActionsLock: "v0.4.1",
+  },
+
+  // Supply-chain cooldown: a release must be 7 days old before Renovate proposes it. With strict
+  // filtering no branch or PR exists until the age check passes, so automerge can never land a
+  // release younger than this.
+  minimumReleaseAge: "7 days",
+  internalChecksFilter: "strict",
+
+  // Merge without review once CI is green, through GitHub's native auto-merge. The repo needs
+  // "Allow auto-merge" and squash merges enabled, and a main ruleset requiring the `ci` check:
+  // the ruleset is what stops a PR merging before CI passes.
+  automerge: true,
+  automergeType: "pr",
+  automergeStrategy: "squash",
+  platformAutomerge: true,
+
+  nix: {
+    enabled: true,
+  },
+  "pre-commit": {
+    enabled: true,
+  },
+  lockFileMaintenance: {
+    enabled: true,
+    schedule: ["before 6am on monday"],
+  },
+
+  packageRules: [
+    {
+      // One PR for all GitHub Actions bumps instead of one per action.
+      matchManagers: ["github-actions"],
+      groupName: "github actions",
+    },
+    {
+      // Majors can break things; they wait for a human.
+      matchUpdateTypes: ["major"],
+      automerge: false,
+    },
+  ],
+}
