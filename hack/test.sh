@@ -253,6 +253,18 @@ check_lint() {
     done
   done
 
+  if [[ " $* " == *" go "* ]]; then
+    # golangci-lint refuses a module whose go line is newer than the Go it was built with, so the
+    # shell's Go has to be that one (nixos-26.05: go is 1.26, golangci-lint is built with 1.27).
+    log "[${name}] the dev shell's Go is the one golangci-lint was built with"
+    in_shell "${dest}" bash -c 'go env GOVERSION; golangci-lint version' ||
+      die "go/golangci-lint version failed: $(cat "${log}")"
+    local go_version
+    go_version="$(grep -m1 "^go1" "${log}")"
+    grep -q "built with ${go_version} " "${log}" ||
+      die "the dev shell's ${go_version} is not golangci-lint's Go: $(cat "${log}")"
+  fi
+
   log "[${name}] just lint (in the rendered dev shell)"
   in_shell "${dest}" just lint || die "just lint failed: $(cat "${log}")"
   for flavour in "$@"; do
