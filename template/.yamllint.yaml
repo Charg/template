@@ -5,6 +5,8 @@ ignore: |
   .scratch/
   .direnv/
   .copier-answers.yml
+  # Helm chart templates are Go templates, not YAML (helm-charts flavour; harmless without charts).
+  charts/*/templates/
 
 rules:
   line-length:

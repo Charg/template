@@ -12,9 +12,21 @@ _default:
 lint:
     hack/lint.sh
 
-# Format nix files.
+# Format nix files[% if 'go' in flavours %], Go[% endif %][% if 'python' in flavours %], Python[% endif %].
 fmt:
     git ls-files -z -- '*.nix' | xargs -0 --no-run-if-empty nixfmt
+[% if 'go' in flavours %]
+    golangci-lint fmt ./...
+[% endif %]
+[% if 'python' in flavours %]
+    ruff format
+[% endif %]
+[% if 'go' in flavours %]
+
+# Run the Go tests.
+test:
+    go test ./...
+[% endif %]
 
 # Install the prek git hooks from .pre-commit-config.yaml (once per clone).
 install-hooks:

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Every linter the repo runs. CI runs this through `just lint`, and so does the prek hook.
+# Every linter the repo runs, then each script in hack/lint.d/. CI runs this through `just lint`,
+# and so does the prek hook.
 
 # shellcheck source=hack/tools.sh
 source "$(dirname "${BASH_SOURCE[0]}")/tools.sh"
@@ -22,6 +23,13 @@ mapfile -d '' nix_files < <(repo_files '*.nix')
 if ((${#nix_files[@]} > 0)); then
   nixfmt --check "${nix_files[@]}"
 fi
+
+# Flavour lint steps (hack/lint.d/<flavour>.sh), and any the project adds there.
+for step in hack/lint.d/*.sh; do
+  [ -e "${step}" ] || continue
+  log "${step}"
+  bash "${step}"
+done
 
 if [ -d .github/workflows ]; then
   log "actionlint"

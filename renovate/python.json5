@@ -1,0 +1,8 @@
+// Renovate rules for projects with the python flavour. Projects extend it after default.json5:
+//   extends: ["github>Charg/template//renovate/default.json5", "github>Charg/template//renovate/python.json5"]
+// Python libraries come from nixpkgs (python3.withPackages in flake.nix), which the default
+// preset's nix lock maintenance already moves, so there are no rules yet. The preset exists so
+// rules added later reach every python project without a PR to each.
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+}

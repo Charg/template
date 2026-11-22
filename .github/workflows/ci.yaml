@@ -32,10 +32,25 @@ jobs:
         run: nix develop -c just lint
 
   test:
-    name: test
+    name: test (${{ matrix.variant }})
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        # Every variant in hack/test.sh's ALL_VARIANTS, one job each: each builds its own dev shell.
+        variant:
+          - github
+          - offline
+          - unstable
+          - go
+          - container-images
+          - helm-charts
+          - python
+          - combo
+          - update
+          - helm-unstable
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -47,8 +62,10 @@ jobs:
       - name: Install nix
         uses: cachix/install-nix-action@3dc140bfc76c49fbd4dd958429132e3746bcb086 # v31.11.5
 
-      - name: Render and check every variant
-        run: nix develop -c just test
+      - name: Render and check the variant
+        env:
+          VARIANT: ${{ matrix.variant }}
+        run: nix develop -c just test "${VARIANT}"
 
   # The one check main's ruleset requires, so adding or renaming jobs never touches the ruleset.
   ci:

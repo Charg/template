@@ -1,0 +1,3 @@
+# ruff (hack/lint.d/python.sh): linter and formatter. Defaults plus import sorting.
+[lint]
+extend-select = ["I"]

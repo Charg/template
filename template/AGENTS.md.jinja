@@ -44,13 +44,56 @@
 - Commit directly to `main` with conventional commit messages (`feat:`, `fix:`, `docs:`, ...).
 - Commit only when asked.
 [% endif %]
+[% if 'go' in flavours %]
+
+## Go
+
+- Go and golangci-lint come from the flake. `just lint` runs golangci-lint's linters and formatters
+  (`.golangci.yml`) over every module (`hack/lint.d/go.sh`); `just fmt` applies the formatters and
+  `just test` runs `go test ./...`.
+- `go.mod`'s `go` line must not be newer than the flake's Go, or golangci-lint refuses the module.
+- Renovate groups Go module patches (automerged) and minors (manual); `k8s.io` and `sigs.k8s.io`
+  modules move together in one manual group, and the Go toolchain bump is its own manual PR.
+[% endif %]
+[% if 'container-images' in flavours %]
+
+## Container images
+
+- The docker CLI and buildx come from the flake and talk to the host's daemon.
+- `just lint` runs hadolint over every `Dockerfile` and `Containerfile` (`hack/lint.d/container-images.sh`).
+  Accept a finding for one line with a `# hadolint ignore=DLxxxx` comment and the reason, or for the
+  repo in `.hadolint.yaml`.
+- Pin base images by digest (`image:tag@sha256:...`). Renovate keeps the digests current and
+  merges digest-only bumps without the release-age wait: they are how base-image CVE fixes arrive.
+[% endif %]
+[% if 'helm-charts' in flavours %]
+
+## Helm charts
+
+- Charts live at `charts/<name>/`. helm 3 (with helm-unittest), chart-testing and kubeconform come
+  from the flake, which stays on nixos-26.05: nixos-unstable ships helm 4.
+- `just lint` runs `ct lint --all` (`ct.yaml`) and kubeconform over the manifests each chart renders
+  with `values.yaml` and each `ci/*-values.yaml` (`hack/lint.d/helm-charts.sh`). yamllint skips
+  `charts/*/templates/`, which is Go templates rather than YAML.
+- Renovate leaves digest-only bumps of images (a tag re-pushed upstream) for a human.
+[% endif %]
+[% if 'python' in flavours %]
+
+## Python
+
+- The interpreter is `python3.withPackages` in `flake.nix`: add libraries there, not with pip.
+- `just lint` runs ruff's linter and formatter check (`ruff.toml`) over every Python file
+  (`hack/lint.d/python.sh`); `just fmt` formats.
+[% endif %]
 
 ## Template
 
-- Shared files (flake, justfile, `hack/tools.sh`, `hack/lint.sh`, lint configs, CI, this section)
-  come from `[[ template_repo ]]`; the answers are in `.copier-answers.yml`, which is never edited by
-  hand. Pull template changes with `copier update` and resolve any conflicts it leaves.
-- Projects extend the shared files freely (packages in `flake.nix`, recipes, lint steps);
+- Shared files (flake, justfile, `hack/tools.sh`, `hack/lint.sh`, `hack/lint.d/`, lint configs, CI,
+  this section) come from `[[ template_repo ]]`; the answers are in `.copier-answers.yml`, which is
+  never edited by hand. Pull template changes with `copier update` and resolve any conflicts it
+  leaves. Add a flavour with `copier update --data 'flavours=[...]'`, listing every flavour wanted.
+- Projects extend the shared files freely (packages in `flake.nix`, recipes, lint steps; a new lint
+  step can be its own script in `hack/lint.d/`);
   `copier update` merges template changes around those edits.
 - Only the text between the TEMPLATE markers in this file belongs to the template. Project rules go
   under `## Project` below.

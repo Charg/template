@@ -1,0 +1,19 @@
+---
+# golangci-lint v2 (hack/lint.d/go.sh). Add linters and settings below; keep the formatters.
+version: "2"
+run:
+  allow-parallel-runners: true
+linters:
+  default: standard
+  enable:
+    - misspell
+    - modernize
+    - unconvert
+  exclusions:
+    generated: lax
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
