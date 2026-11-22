@@ -137,7 +137,8 @@ add_fixture() {
   case "$2" in
     go)
       printf 'module example.invalid/demo\n\ngo 1.24\n' >"${dest}/go.mod"
-      printf 'package main\n\nimport "fmt"\n\nfunc main() {\n\tfmt.Println("demo")\n}\n' >"${dest}/main.go"
+      # net pulls in cgo by default: the shell has no C compiler, so it must build without.
+      printf 'package main\n\nimport (\n\t"fmt"\n\t"net"\n)\n\nfunc main() {\n\tfmt.Println(net.IPv4len)\n}\n' >"${dest}/main.go"
       ;;
     container-images)
       printf 'FROM scratch\nCOPY README.md /\n' >"${dest}/Dockerfile"
@@ -263,6 +264,8 @@ check_lint() {
     go_version="$(grep -m1 "^go1" "${log}")"
     grep -q "built with ${go_version} " "${log}" ||
       die "the dev shell's ${go_version} is not golangci-lint's Go: $(cat "${log}")"
+    log "[${name}] just test builds and runs the Go tests"
+    in_shell "${dest}" just test || die "just test failed: $(cat "${log}")"
   fi
 
   log "[${name}] just lint (in the rendered dev shell)"

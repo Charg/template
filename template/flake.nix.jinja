@@ -58,6 +58,11 @@
             # Used by the scripts directly.
             pkgs.git
           ];
+[% if 'go' in flavours %]
+          # go flavour: the shell has no C compiler (mkShellNoCC), so Go builds without cgo, as static
+          # binaries for containers usually are. A project that needs cgo adds pkgs.gcc and drops this.
+          CGO_ENABLED = "0";
+[% endif %]
         };
       });
 
