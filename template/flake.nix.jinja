@@ -13,6 +13,15 @@
         "aarch64-darwin"
       ];
       forAllSystems = f: nixpkgs.lib.genAttrs systems (system: f nixpkgs.legacyPackages.${system});
+      # A Python app's bin/ alone. The package itself would put its python3 and PYTHONPATH into the
+      # shell, ahead of a project's own interpreter.
+      pythonApp =
+        pkgs: app:
+        pkgs.symlinkJoin {
+          inherit (app) pname version;
+          paths = [ app ];
+          postBuild = "find $out -mindepth 1 -maxdepth 1 ! -name bin -exec rm -r {} +";
+        };
     in
     {
       devShells = forAllSystems (pkgs: {
@@ -25,7 +34,7 @@
             pkgs.actionlint
             pkgs.nixfmt
             pkgs.shellcheck
-            pkgs.yamllint
+            (pythonApp pkgs pkgs.yamllint)
             pkgs.zizmor
 [% if 'go' in flavours %]
             # go flavour (hack/lint.d/go.sh). The Go golangci-lint is built with, which can be newer than
@@ -47,7 +56,7 @@
               plugins = [ pkgs.kubernetes-helmPlugins.helm-unittest ];
             })
             pkgs.chart-testing
-            pkgs.yamale
+            (pythonApp pkgs pkgs.yamale)
             pkgs.kubeconform
 [% endif %]
 [% if 'python' in flavours %]
