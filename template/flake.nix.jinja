@@ -28,8 +28,9 @@
             pkgs.yamllint
             pkgs.zizmor
 [% if 'go' in flavours %]
-            # go flavour (hack/lint.d/go.sh).
-            pkgs.go
+            # go flavour (hack/lint.d/go.sh). The Go golangci-lint is built with, which can be newer than
+            # pkgs.go: golangci-lint refuses a module whose go line is newer than its own Go.
+            pkgs.golangci-lint.go
             pkgs.golangci-lint
 [% endif %]
 [% if 'container-images' in flavours %]
@@ -57,6 +58,11 @@
             # Used by the scripts directly.
             pkgs.git
           ];
+[% if 'go' in flavours %]
+          # go flavour: the shell has no C compiler (mkShellNoCC), so Go builds without cgo, as static
+          # binaries for containers usually are. A project that needs cgo adds pkgs.gcc and drops this.
+          CGO_ENABLED = "0";
+[% endif %]
         };
       });
 
