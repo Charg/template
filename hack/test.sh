@@ -153,7 +153,9 @@ type: application
 version: 0.1.0
 appVersion: "1.0.0"
 EOF
-      printf -- '---\ngreeting: hello\n' >"${dest}/charts/demo/values.yaml"
+      # The greeting is required and values.yaml has none: a chart with ci/ scenarios is only
+      # rendered with those, as ct does.
+      printf -- '---\ngreeting: ""\n' >"${dest}/charts/demo/values.yaml"
       printf -- '---\ngreeting: bonjour\n' >"${dest}/charts/demo/ci/french-values.yaml"
       cat >"${dest}/charts/demo/templates/configmap.yaml" <<'EOF'
 apiVersion: v1
@@ -161,7 +163,7 @@ kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-demo
 data:
-  greeting: {{ .Values.greeting | quote }}
+  greeting: {{ required "greeting is required" .Values.greeting | quote }}
 EOF
       ;;
     python)
@@ -257,6 +259,9 @@ check_lint() {
     grep -qF "$(flavour_lint_marker "${flavour}")" "${log}" ||
       die "just lint did not run the ${flavour} lint step: $(cat "${log}")"
   done
+
+  log "[${name}] prek hooks pass (the lint hook already ran above)"
+  SKIP=lint in_shell "${dest}" prek run --all-files || die "prek hooks failed: $(cat "${log}")"
 
   for flavour in "$@"; do
     log "[${name}] the ${flavour} lint step fails on a broken fixture"
