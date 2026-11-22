@@ -281,7 +281,7 @@ run_render_variant() {
     go | container-images | helm-charts) flavours=("${name}") ;;
     # The python repos in mind are offline: covers flavours without .github/.
     python) github=false flavours=(python) ;;
-    combo) flavours=(go container-images helm-charts) ;;
+    combo) flavours=(go container-images helm-charts python) ;;
   esac
   dest="${work}/demo-${name}"
 

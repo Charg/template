@@ -36,8 +36,9 @@ hack/tools.sh, lint.sh   symlinks into template/hack/: this repo lints itself wi
   `_exclude` (its config and `hack/lint.d/<flavour>.sh`), plus `renovate/<flavour>.json5`. Keep
   flavours thin: only what holds for every repo using them, no repo layouts or release pipelines.
   Insert flavour blocks mid-file (before the project's usual append point) so they merge cleanly
-  into projects that appended their own lines. A new flavour needs a variant and the per-flavour
-  cases in `hack/test.sh`, and a line in the CI test matrix.
+  into projects that appended their own lines. A new flavour needs its name in the fixed list in
+  `template/.github/renovate.json5.jinja` (a fixed order keeps `extends` stable), a variant and the
+  per-flavour cases in `hack/test.sh`, and a line in the CI test matrix.
 - Policy that can be referenced rather than copied goes in the Renovate preset
   (`renovate/default.json5`). Changes there reach every project on Renovate's next run with no PR,
   so treat them as a change to every repo at once.

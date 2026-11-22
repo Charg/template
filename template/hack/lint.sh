@@ -24,6 +24,13 @@ if ((${#nix_files[@]} > 0)); then
   nixfmt --check "${nix_files[@]}"
 fi
 
+# Flavour lint steps (hack/lint.d/<flavour>.sh), and any the project adds there.
+for step in hack/lint.d/*.sh; do
+  [ -e "${step}" ] || continue
+  log "${step}"
+  bash "${step}"
+done
+
 if [ -d .github/workflows ]; then
   log "actionlint"
   actionlint
@@ -33,10 +40,3 @@ if [ -d .github/workflows ]; then
   # network; Renovate keeps the pinned actions current. Any finding fails the run.
   zizmor --offline --min-severity low .github/workflows
 fi
-
-# Flavour lint steps (hack/lint.d/<flavour>.sh), and any the project adds there.
-for step in hack/lint.d/*.sh; do
-  [ -e "${step}" ] || continue
-  log "${step}"
-  bash "${step}"
-done
