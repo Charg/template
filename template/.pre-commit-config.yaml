@@ -13,6 +13,8 @@ repos:
         exclude: \.patch$
       - id: check-yaml
         args: [--allow-multiple-documents]
+        # Helm chart templates are Go templates, not YAML (helm-charts flavour).
+        exclude: ^charts/[^/]+/templates/
       - id: check-toml
       - id: check-merge-conflict
       - id: detect-private-key

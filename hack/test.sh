@@ -260,6 +260,9 @@ check_lint() {
       die "just lint did not run the ${flavour} lint step: $(cat "${log}")"
   done
 
+  log "[${name}] prek hooks pass (the lint hook already ran above)"
+  SKIP=lint in_shell "${dest}" prek run --all-files || die "prek hooks failed: $(cat "${log}")"
+
   for flavour in "$@"; do
     log "[${name}] the ${flavour} lint step fails on a broken fixture"
     broken="${dest}/$(broken_file "${flavour}")"
