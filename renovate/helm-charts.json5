@@ -1,0 +1,16 @@
+// Renovate rules for projects with the helm-charts flavour. Projects extend it after default.json5:
+//   extends: ["github>Charg/template//renovate/default.json5", "github>Charg/template//renovate/helm-charts.json5"]
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+
+  packageRules: [
+    {
+      // The same tag pointing at a new digest in a chart's values: upstream re-pushed a tag, which
+      // is either a rebuild or a compromise, and only a human can tell which. Projects opt their
+      // own rebuilt images back into automerge with a later rule.
+      matchManagers: ["helm-values"],
+      matchUpdateTypes: ["digest"],
+      automerge: false,
+    },
+  ],
+}

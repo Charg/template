@@ -27,6 +27,33 @@
             pkgs.shellcheck
             pkgs.yamllint
             pkgs.zizmor
+[% if 'go' in flavours %]
+            # go flavour (hack/lint.d/go.sh).
+            pkgs.go
+            pkgs.golangci-lint
+[% endif %]
+[% if 'container-images' in flavours %]
+            # container-images flavour: builds through the host's docker daemon with buildx, so
+            # multi-arch builds work the same everywhere; lint in hack/lint.d/container-images.sh.
+            pkgs.docker-client
+            pkgs.docker-buildx
+            pkgs.hadolint
+[% endif %]
+[% if 'helm-charts' in flavours %]
+            # helm-charts flavour (hack/lint.d/helm-charts.sh). helm-unittest is a helm plugin;
+            # wrapHelm puts it on HELM_PLUGINS so `helm unittest` works without an install step.
+            (pkgs.wrapHelm pkgs.kubernetes-helm {
+              plugins = [ pkgs.kubernetes-helmPlugins.helm-unittest ];
+            })
+            pkgs.chart-testing
+            pkgs.yamale
+            pkgs.kubeconform
+[% endif %]
+[% if 'python' in flavours %]
+            # python flavour (hack/lint.d/python.sh). Add the project's libraries to the list.
+            (pkgs.python3.withPackages (p: [ ]))
+            pkgs.ruff
+[% endif %]
             # Used by the scripts directly.
             pkgs.git
           ];

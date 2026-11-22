@@ -1,6 +1,11 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  // Shared policy (7-day release age, automerge, nix lock maintenance, actions pinning) lives in
-  // [[ template_repo ]]. Add only this repo's packageRules and customManagers here.
-  extends: ["github>[[ template_repo ]]//renovate/default.json5"],
+  // Shared policy (7-day release age, automerge, nix lock maintenance, actions pinning) and each
+  // flavour's rules live in [[ template_repo ]]. Add only this repo's packageRules and customManagers here.
+  extends: [
+    "github>[[ template_repo ]]//renovate/default.json5",
+[% for flavour in ['go', 'container-images', 'helm-charts', 'python'] if flavour in flavours %]
+    "github>[[ template_repo ]]//renovate/[[ flavour ]].json5",
+[% endfor %]
+  ],
 }

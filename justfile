@@ -17,9 +17,10 @@ new path *args:
 update path *args:
     hack/update.sh "$@"
 
-# Render every variant of the template, lint each one, and check `copier update` is a no-op.
-test:
-    hack/test.sh
+# Render every variant of the template (or the named ones), lint each, and check `copier update`.
+[positional-arguments]
+test *variants:
+    hack/test.sh "$@"
 
 # Lint this repo: yamllint, shellcheck, nixfmt, actionlint, zizmor.
 lint:

@@ -1,0 +1,17 @@
+// Renovate rules for projects with the container-images flavour. Projects extend it after
+// default.json5:
+//   extends: ["github>Charg/template//renovate/default.json5", "github>Charg/template//renovate/container-images.json5"]
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  // Base images are pinned by digest next to their tag.
+  extends: ["docker:pinDigests"],
+
+  packageRules: [
+    {
+      // Base-image digest bumps are how CVE fixes arrive: no release-age wait, merge on green.
+      matchManagers: ["dockerfile"],
+      matchUpdateTypes: ["digest", "pinDigest"],
+      minimumReleaseAge: null,
+    },
+  ],
+}

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Every linter the repo runs. CI runs this through `just lint`, and so does the prek hook.
+# Every linter the repo runs, then each script in hack/lint.d/. CI runs this through `just lint`,
+# and so does the prek hook.
 
 # shellcheck source=hack/tools.sh
 source "$(dirname "${BASH_SOURCE[0]}")/tools.sh"
@@ -32,3 +33,10 @@ if [ -d .github/workflows ]; then
   # network; Renovate keeps the pinned actions current. Any finding fails the run.
   zizmor --offline --min-severity low .github/workflows
 fi
+
+# Flavour lint steps (hack/lint.d/<flavour>.sh), and any the project adds there.
+for step in hack/lint.d/*.sh; do
+  [ -e "${step}" ] || continue
+  log "${step}"
+  bash "${step}"
+done

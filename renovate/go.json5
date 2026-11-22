@@ -1,0 +1,39 @@
+// Renovate rules for projects with the go flavour. Projects extend it after default.json5:
+//   extends: ["github>Charg/template//renovate/default.json5", "github>Charg/template//renovate/go.json5"]
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+
+  postUpdateOptions: ["gomodTidy"],
+
+  packageRules: [
+    {
+      // Module patches are safe to batch and automerge.
+      matchManagers: ["gomod"],
+      matchUpdateTypes: ["patch"],
+      groupName: "go dependencies (patch)",
+    },
+    {
+      // Minors stay manual: most Go modules are v0.x, where a minor is allowed to break the API.
+      matchManagers: ["gomod"],
+      matchUpdateTypes: ["minor"],
+      groupName: "go dependencies (minor)",
+      automerge: false,
+    },
+    {
+      // k8s.io/* and sigs.k8s.io/* release in lockstep against a Kubernetes minor; bumped one at a
+      // time they make incompatible go.mod graphs. After the groups above, so this groupName wins.
+      matchManagers: ["gomod"],
+      matchPackageNames: ["k8s.io/**", "sigs.k8s.io/**"],
+      groupName: "kubernetes packages",
+      automerge: false,
+    },
+    {
+      // go.mod's go/toolchain lines: a deliberate change of its own, and it must not get ahead of
+      // the Go in the flake.
+      matchManagers: ["gomod"],
+      matchDepTypes: ["golang", "toolchain"],
+      groupName: "go toolchain",
+      automerge: false,
+    },
+  ],
+}

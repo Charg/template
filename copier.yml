@@ -27,6 +27,15 @@ _skip_if_exists:
 
 _exclude:
   - "[% if not github %].github[% endif %]"
+  # Whole files a flavour brings; see `flavours` below.
+  - "[% if 'go' not in flavours %].golangci.yml[% endif %]"
+  - "[% if 'go' not in flavours %]hack/lint.d/go.sh[% endif %]"
+  - "[% if 'container-images' not in flavours %].hadolint.yaml[% endif %]"
+  - "[% if 'container-images' not in flavours %]hack/lint.d/container-images.sh[% endif %]"
+  - "[% if 'helm-charts' not in flavours %]ct.yaml[% endif %]"
+  - "[% if 'helm-charts' not in flavours %]hack/lint.d/helm-charts.sh[% endif %]"
+  - "[% if 'python' not in flavours %]ruff.toml[% endif %]"
+  - "[% if 'python' not in flavours %]hack/lint.d/python.sh[% endif %]"
 
 project_name:
   type: str
@@ -53,6 +62,23 @@ nixpkgs_channel:
   choices:
     - nixos-26.05
     - nixos-unstable
+
+# A flavour is a toolchain layer: its tools in the flake, a lint step in hack/lint.d/, config,
+# Renovate rules (renovate/<flavour>.json5), .gitignore entries and an AGENTS.md section. Add one to
+# an existing project with `copier update --data 'flavours=[go,python]'` (list them all).
+flavours:
+  type: str
+  help: Toolchain flavours (space toggles, enter accepts; none is fine)
+  multiselect: true
+  choices:
+    "go: Go toolchain, golangci-lint": go
+    "container-images: Dockerfiles, docker buildx, hadolint": container-images
+    "helm-charts: helm 3, chart-testing, kubeconform for charts/*": helm-charts
+    "python: python3, ruff": python
+  default: []
+  validator: >-
+    [% if 'helm-charts' in flavours and nixpkgs_channel != 'nixos-26.05' %]helm-charts needs
+    nixpkgs_channel nixos-26.05: nixos-unstable ships helm 4[% endif %]
 
 # Not asked: fixed values the templates reference.
 template_repo:

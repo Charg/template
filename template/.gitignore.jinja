@@ -18,6 +18,31 @@ Thumbs.db
 result
 result-*
 .direnv/
+[% if 'go' in flavours %]
+
+# Go build and test output
+bin/
+*.test
+*.out
+[% endif %]
+[% if 'helm-charts' in flavours %]
+
+# Helm: packaged charts and fetched dependencies
+*.tgz
+charts/*/charts/
+charts/*/Chart.lock
+*.snap.actual
+[% endif %]
+[% if 'python' in flavours %]
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.ruff_cache/
+.pytest_cache/
+[% endif %]
 
 # Personal Claude Code state
 # Personal preferences and auto-allow permissions
