@@ -268,6 +268,18 @@ check_lint() {
     in_shell "${dest}" just test || die "just test failed: $(cat "${log}")"
   fi
 
+  if [[ " $* " == *" python "* ]]; then
+    # The shell's python3 is the project's python3.withPackages env, and nothing else (yamllint is
+    # a Python app) leaks an interpreter or PYTHONPATH into it.
+    log "[${name}] python3 is the project's interpreter, with no PYTHONPATH"
+    # Empty it first: this script runs in the template repo's own dev shell, whose copier sets PYTHONPATH.
+    # shellcheck disable=SC2016 # expanded by the bash inside the dev shell
+    PYTHONPATH='' in_shell "${dest}" bash -c 'python3 -I -c "import sys; print(\"prefix=\" + sys.prefix)"; echo "PYTHONPATH=${PYTHONPATH:-}"' ||
+      die "python3 failed: $(cat "${log}")"
+    grep -q '^prefix=.*-env$' "${log}" || die "python3 is not the withPackages env: $(cat "${log}")"
+    grep -qx 'PYTHONPATH=' "${log}" || die "the dev shell sets PYTHONPATH: $(cat "${log}")"
+  fi
+
   log "[${name}] just lint (in the rendered dev shell)"
   in_shell "${dest}" just lint || die "just lint failed: $(cat "${log}")"
   for flavour in "$@"; do
