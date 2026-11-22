@@ -86,6 +86,10 @@ for variant in github offline unstable; do
   log "[${variant}] just lint (in the rendered dev shell)"
   (cd "${dest}" && nix develop --command just lint)
 
+  log "[${variant}] just versions lists the dev shell's packages"
+  (cd "${dest}" && nix develop --command just versions) | grep '^prek ' >/dev/null ||
+    die "just versions did not list prek"
+
   log "[${variant}] copier update is a no-op"
   git -C "${dest}" add --all
   git_test -C "${dest}" commit --quiet --message "init"

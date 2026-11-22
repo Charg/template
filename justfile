@@ -28,3 +28,8 @@ lint:
 # Install the prek git hooks from .pre-commit-config.yaml (once per clone).
 install-hooks:
     prek install
+
+# List the dev shell's packages and the versions flake.lock pins them to.
+versions:
+    @nix eval --raw ".#devShells.$(nix eval --impure --raw --expr builtins.currentSystem).default.nativeBuildInputs" \
+      --apply 'ps: builtins.concatStringsSep "" (map (p: "${p.pname or p.name} ${p.version or "-"}\n") ps)'
